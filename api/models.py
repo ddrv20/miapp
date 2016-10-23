@@ -122,6 +122,16 @@ class PppTeg(models.Model):
     def __unicode__(self):
         return self.news
 
+    def as_json2(self):
+        return dict(
+            id=self.id,
+            typeNew=self.typeNews,
+            new=self.news,
+            statu=self.status,
+            image=self.image.image.url,
+            docs=self.docs
+        )
+
 
 class Docs(models.Model):
     name = models.CharField(max_length=100, default='name')
@@ -134,6 +144,17 @@ class Docs(models.Model):
     def __unicode__(self):
         return self.name
 
+    def as_json3(self):
+        return dict(
+            id=self.id,
+            typeDoc=self.typeDocs,
+            nam=self.name,
+            statu=self.status,
+            image=self.image.image.url,
+            docs=self.docs,
+            descriptio=self.description
+        )
+
 
 class Event(models.Model):
     title = models.CharField(max_length=100, default='title')
@@ -143,6 +164,15 @@ class Event(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def as_json4(self):
+        return dict(
+            id=self.id,
+            titl=self.title,
+            dat=self.date,
+            image=self.image.image.url,
+            descriptio=self.description
+        )
 
 
 class Notifications(models.Model):
