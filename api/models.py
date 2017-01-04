@@ -3,13 +3,10 @@ from __future__ import unicode_literals
 import os
 from django.db import models
 from django.utils import timezone
+from model_utils import Choices
+import datetime
 
-
-PORTFOLIO_CHOICESUSER = (
-    (1, 'Estudiante'),
-    (2, 'Profesor'),
-    (3, 'Invitados'),
-)
+PORTFOLIO_CHOICESUSER = Choices((1, 'student', ('Estudiante')), (2, 'teacher', ('Profesor')))
 
 PORTFOLIO_CHOICESCAREER = (
     (1, 'Ingenieria de Sistemas'),
@@ -57,30 +54,25 @@ class Image(models.Model):
         return self.alt
 
 
-class User(models.Model):
-    name = models.CharField(max_length=50)
-    email = models.EmailField()
-    image = models.ForeignKey(Image, on_delete=models.CASCADE)
-
-    def __unicode__(self):
-        return self.name
-
-
-class TypoUser(models.Model):
-    typo = models.SmallIntegerField(choices=PORTFOLIO_CHOICESUSER)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __unicode__(self):
-        return self.get_typo_display()
-
-
 class Career(models.Model):
-    careerTypo = models.SmallIntegerField(choices=PORTFOLIO_CHOICESCAREER)
+    careerTypo = models.CharField(max_length=50)
     turn = models.SmallIntegerField(choices=PORTFOLIO_CHOICESTURN)
     imageCareer = models.ForeignKey(Image, on_delete=models.CASCADE, null=True)
 
     def __unicode__(self):
-        return self.get_careerTypo_display()
+        return self.careerTypo
+
+
+class User(models.Model):
+    name = models.CharField(max_length=50)
+    email = models.EmailField()
+    image = models.CharField(max_length=200)
+    typoUser = models.SmallIntegerField(choices=PORTFOLIO_CHOICESUSER, default=0)
+    typoCarrer = models.CharField(max_length=50, default="")
+    career = models.ForeignKey(Career, on_delete=models.CASCADE, null=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Semester(models.Model):
@@ -97,6 +89,8 @@ class News(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
     description = models.CharField(max_length=100)
     docs = models.CharField(max_length=100)
+    privilege = models.SmallIntegerField(choices=PORTFOLIO_CHOICESUSER, default=1)
+    date = models.DateField(default=timezone.now())
 
     def __unicode__(self):
         return self.news
@@ -104,11 +98,13 @@ class News(models.Model):
     def as_json(self):
         return dict(
             id=self.id,
-            new=self.news,
-            statu=self.status,
+            news=self.news,
+            status=self.status,
             image=self.image.image.url,
-            descrip=self.description,
-            docs=self.docs
+            description=self.description,
+            docs=self.docs,
+            privelege=self.privilege,
+            date=self.date
         )
 
 
@@ -179,7 +175,6 @@ class Notifications(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=100)
     status = models.SmallIntegerField(choices=PORTFOLIO_CHOICESSTATUS)
-    typoUser = models.ForeignKey(TypoUser, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return self.name
